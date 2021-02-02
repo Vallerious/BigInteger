@@ -1,11 +1,11 @@
 #include <iostream>
-#include "BigSignedInteger.cpp"
+#include "BigInteger.cpp"
 
 int main() {
-    BigSignedInteger a("438934858934&*(&*(3844");
-    BigSignedInteger b("3829423094820394890092342479283749823748923748923748927598275973249857328982193819238913912893382942309482039489009234382942309482039489009234382942309482039489009234382942309482039489009234382942309482039489009234");
+    BigInteger a("239");
+    BigInteger b("-239");
 
-    BigSignedInteger result = a + b;
+    BigInteger result = a - b;
 
     std::cout << "Result is: " << result << std::endl;
 
