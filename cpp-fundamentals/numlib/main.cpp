@@ -2,8 +2,8 @@
 #include "BigInteger.cpp"
 
 int main() {
-    BigInteger a("239");
-    BigInteger b("-239");
+    BigInteger a("0");
+    BigInteger b("0");
 
     BigInteger result = a - b;
 

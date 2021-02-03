@@ -11,6 +11,8 @@ class BigInteger {
 private:
     std::string digits;
     unsigned int digitsCount;
+    enum OP { ADD, SUB, MUL, DEL };
+    std::string zero = "0";
 
     bool isValid(std::string digits) {
         if (digits.empty()) {
@@ -31,28 +33,104 @@ private:
 
         return true;
     }
-public:
-    BigInteger(std::string digits): digits(digits) {
-        if (!isValid(digits)) {
-            throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
+
+    std::string eval(std::string a, std::string b, BigInteger::OP operation) const {
+        char firstCharInA = a.at(0);
+        char firstCharInB = b.at(0);
+        bool AIsNegative = firstCharInA == '-';
+        bool BIsNegative = firstCharInB == '-';
+
+        if (zero == a) {
+            if (zero == b) {
+                return zero;
+            } else {
+                return b;
+            }
+        } else if (zero == b) {
+            if (zero == a) {
+                return zero;
+            } else {
+                return a;
+            }
         }
-        digitsCount = digits.size();
+
+        // add a,b when |a| = |b| and a < 0 and b > 0 or a > 0 and b < 0
+        if (((AIsNegative && !BIsNegative) || (!AIsNegative && BIsNegative)) &&
+            _abs(a).compare(_abs(b)) == 0) {
+            return "0";
+        }
+
+        if (operation == BigInteger::OP::ADD) {
+            // -x + (-y) = -x - y
+            if (AIsNegative && BIsNegative) {
+                return _negate(eval(_abs(a), _abs(b), BigInteger::OP::ADD));
+            }
+            // x + (-y) = x - y
+            else if (!AIsNegative && BIsNegative) {
+                return eval(a, _abs(b), BigInteger::OP::SUB);
+            }
+
+            // -x + y = y - x
+            else if (AIsNegative && !BIsNegative) {
+                return eval(b, a, BigInteger::OP::SUB);
+            }
+
+            // x + y
+            else if (!AIsNegative && !BIsNegative) {
+                return add(a, b);
+            }
+        } else if (operation == BigInteger::OP::SUB) {
+            // -x - y
+            if (AIsNegative && !BIsNegative) {
+                return _negate(eval(_abs(a), _abs(b), BigInteger::OP::ADD));
+            }
+            // x - y
+            else if (!AIsNegative && !BIsNegative) {
+                // subtract
+            }
+
+            // -x - (-y) = -x + y
+            else if (AIsNegative && BIsNegative) {
+                return eval(a, _abs(b), BigInteger::OP::ADD);
+            }
+
+            // x - (-y) = x + y
+            else if (!AIsNegative && BIsNegative) {
+                return eval(a, _abs(b), BigInteger::OP::ADD);
+            }
+        }
+
+        return "";
     }
 
-    std::string toString() const {
-        return digits;
+    std::string _negate(std::string a) const {
+        if (a.at(0) == '-') {
+            return a;
+        }
+
+        return "-" + a;
     }
 
-    BigInteger operator+(const BigInteger& other) const {
-        int idxA = digitsCount - 1;
-        int idxB = other.digitsCount - 1;
+    std::string _abs(std::string a) const {
+        if (a.at(0) == '-') {
+            return a.substr(1);
+        }
+
+        return a;
+    }
+
+    std::string add(std::string a, std::string b) const {
+        int lenA = a.size();
+        int lenB = b.size();
+        int idxA = lenA - 1;
+        int idxB = lenB - 1;
         std::string sumStr;
-        sumStr.reserve(std::max(digitsCount, other.digitsCount) + 1);
+        sumStr.reserve(std::max(lenA, lenB) + 1);
         short carry = 0;
 
         while (idxA >= 0 || idxB >= 0) {
-            short ac = idxA < 0 ? 0 : digits.at(idxA) - '0';
-            short bc = idxB < 0 ? 0 : other.digits.at(idxB) - '0';
+            short ac = idxA < 0 ? 0 : a.at(idxA) - '0';
+            short bc = idxB < 0 ? 0 : b.at(idxB) - '0';
 
             short digitSum = ac + bc + carry;
 
@@ -73,35 +151,26 @@ public:
             sumStr = "1" + sumStr;
         }
 
-        return BigInteger(sumStr);
+        return sumStr;
+    }
+public:
+    BigInteger(std::string digits): digits(digits) {
+        if (!isValid(digits)) {
+            throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
+        }
+        digitsCount = digits.size();
+    }
+
+    std::string toString() const {
+        return digits;
+    }
+
+    BigInteger operator+(const BigInteger& other) const {
+        return BigInteger(eval(digits, other.digits, BigInteger::OP::ADD));
     }
 
     BigInteger operator-(BigInteger& other) const {
-        char thisStartSym = digits.at(0);
-        char otherStartSym = other.digits.at(0);
-        bool thisIsNegative = thisStartSym == '-';
-        bool otherIsNegative = otherStartSym == '-';
-
-        if ((thisIsNegative && !otherIsNegative && this->digits.substr(1) == other.digits) ||
-                (!thisIsNegative && !otherIsNegative && this->digits == other.digits)) {
-            return BigInteger("0");
-        }
-
-        // - a - (-b) = -a + b
-        if (thisIsNegative && !otherIsNegative) {
-
-        }
-
-        // a - (-b) = a + b
-        if (!thisIsNegative && otherIsNegative) {
-            BigInteger b(other.digits.substr(1));
-            return BigInteger((*this + b).toString());
-        }
-
-        // algorithm to know which of two string numbers is larger
-        // check lenght first
-        // if length is equal, then check the highest magnitude digit (furthest to the left)
-        // the number with the larger such digit is bigger than the other
+        return BigInteger(eval(digits, other.digits, BigInteger::OP::SUB));
     }
 
     friend std::ostream& operator<<(std::ostream& os, BigInteger& bsi) {
