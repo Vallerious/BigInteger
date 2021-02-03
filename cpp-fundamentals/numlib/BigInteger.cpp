@@ -41,22 +41,14 @@ private:
         bool BIsNegative = firstCharInB == '-';
 
         if (zero == a) {
-            if (zero == b) {
-                return zero;
-            } else {
-                return b;
-            }
+            return zero == b ? zero : b;
         } else if (zero == b) {
-            if (zero == a) {
-                return zero;
-            } else {
-                return a;
-            }
+            return zero == a ? zero : a;
         }
 
         // add a,b when |a| = |b| and a < 0 and b > 0 or a > 0 and b < 0
         if (((AIsNegative && !BIsNegative) || (!AIsNegative && BIsNegative)) &&
-            _abs(a).compare(_abs(b)) == 0) {
+            _abs(a).compare(_abs(b)) == 0 && operation == BigInteger::OP::ADD) {
             return "0";
         }
 
@@ -119,6 +111,34 @@ private:
         return a;
     }
 
+    std::string _max(std::string a, std::string b) const {
+        char firstCharInA = a.at(0);
+        char firstCharInB = b.at(0);
+        bool AIsNegative = firstCharInA == '-';
+        bool BIsNegative = firstCharInB == '-';
+
+        if (AIsNegative && !BIsNegative) {
+            return b;
+        } else if (!AIsNegative && BIsNegative) {
+            return a;
+        } else if (AIsNegative && b == "0") {
+            return b;
+        } else if (BIsNegative && a == "0") {
+            return a;
+        }
+//        else if (!AIsNegative && a != "0" && b == "0") {
+//            return a;
+//        } else if (!BIsNegative && b != "0" && a == "0") {
+//            return b;
+//        }
+
+        if (AIsNegative && BIsNegative) {
+            return a.compare(b) == 1 ? b : a;
+        }
+
+        return a.compare(b) == 1 ? a : b;
+    }
+
     std::string add(std::string a, std::string b) const {
         int lenA = a.size();
         int lenB = b.size();
@@ -163,6 +183,10 @@ public:
 
     std::string toString() const {
         return digits;
+    }
+
+    std::string max(BigInteger& b) const {
+        return _max(digits, b.toString());
     }
 
     BigInteger operator+(const BigInteger& other) const {
