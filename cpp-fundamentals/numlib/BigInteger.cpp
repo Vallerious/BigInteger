@@ -35,18 +35,17 @@ private:
     }
 
     std::string eval(std::string a, std::string b, BigInteger::OP operation) const {
-        char firstCharInA = a.at(0);
-        char firstCharInB = b.at(0);
-        bool AIsNegative = firstCharInA == '-';
-        bool BIsNegative = firstCharInB == '-';
+        bool AIsNegative = _isNeg(a);
+        bool BIsNegative = _isNeg(b);
 
+        // if x = 0 or y = 0 or (x = 0 and y = 0)
         if (zero == a) {
             return zero == b ? zero : b;
         } else if (zero == b) {
             return zero == a ? zero : a;
         }
 
-        // add a,b when |a| = |b| and a < 0 and b > 0 or a > 0 and b < 0
+        // _add a,b when |a| = |b| and a < 0 and b > 0 or a > 0 and b < 0
         if (((AIsNegative && !BIsNegative) || (!AIsNegative && BIsNegative)) &&
             _abs(a).compare(_abs(b)) == 0 && operation == BigInteger::OP::ADD) {
             return "0";
@@ -69,7 +68,7 @@ private:
 
             // x + y
             else if (!AIsNegative && !BIsNegative) {
-                return add(a, b);
+                return _add(a, b);
             }
         } else if (operation == BigInteger::OP::SUB) {
             // -x - y
@@ -78,7 +77,7 @@ private:
             }
             // x - y
             else if (!AIsNegative && !BIsNegative) {
-                // subtract
+                return _subtract(a, b);
             }
 
             // -x - (-y) = -x + y
@@ -111,11 +110,15 @@ private:
         return a;
     }
 
-    std::string _max(std::string a, std::string b) const {
+    bool _isNeg(std::string a) const {
         char firstCharInA = a.at(0);
-        char firstCharInB = b.at(0);
-        bool AIsNegative = firstCharInA == '-';
-        bool BIsNegative = firstCharInB == '-';
+
+        return firstCharInA == '-';
+    }
+
+    std::string _max(std::string a, std::string b) const {
+        bool AIsNegative = _isNeg(a);
+        bool BIsNegative = _isNeg(b);
 
         if (AIsNegative && !BIsNegative) {
             return b;
@@ -126,20 +129,21 @@ private:
         } else if (BIsNegative && a == "0") {
             return a;
         }
-//        else if (!AIsNegative && a != "0" && b == "0") {
-//            return a;
-//        } else if (!BIsNegative && b != "0" && a == "0") {
-//            return b;
-//        }
 
         if (AIsNegative && BIsNegative) {
-            return a.compare(b) == 1 ? b : a;
+            return a.compare(b) > 0 ? b : a;
         }
 
-        return a.compare(b) == 1 ? a : b;
+        if (a.size() > b.size()) {
+            return a;
+        } else if (b.size() > a.size()) {
+            return b;
+        }
+
+        return a.compare(b) > 0 ? a : b;
     }
 
-    std::string add(std::string a, std::string b) const {
+    std::string _add(std::string a, std::string b) const {
         int lenA = a.size();
         int lenB = b.size();
         int idxA = lenA - 1;
@@ -173,6 +177,43 @@ private:
 
         return sumStr;
     }
+
+    std::string _subtract(std::string a, std::string b) const {
+        // make so that a > b
+        std::string subtractee = _max(a, b);
+        std::string subtractor = a == subtractee ? b : a;
+
+        int lenA = subtractee.size();
+        int lenB = subtractor.size();
+        int idxA = lenA - 1;
+        int idxB = lenB - 1;
+        std::string subResult;
+        subResult.reserve(std::max(lenA, lenB) + 1);
+        short carry = 0;
+
+        while (idxA >= 0 || idxB >= 0) {
+            short ac = idxA < 0 ? 0 : subtractee.at(idxA) - '0';
+            short bc = idxB < 0 ? 0 : subtractor.at(idxB) - '0';
+
+            short digitSub = ac - bc - carry;
+
+            if (digitSub < 0) {
+                carry = 1;
+                digitSub += 10;
+            } else {
+                carry = 0;
+            }
+
+            if (!(idxA <= 0 && idxB <= 0 && digitSub == 0)) {
+                subResult = std::to_string(digitSub) + subResult;
+            }
+
+            idxA -= 1;
+            idxB -= 1;
+        }
+
+        return a < b ? _negate(subResult) : subResult;
+    }
 public:
     BigInteger(std::string digits): digits(digits) {
         if (!isValid(digits)) {
@@ -185,8 +226,8 @@ public:
         return digits;
     }
 
-    std::string max(BigInteger& b) const {
-        return _max(digits, b.toString());
+    BigInteger max(BigInteger& b) const {
+        return BigInteger(_max(digits, b.toString()));
     }
 
     BigInteger operator+(const BigInteger& other) const {
@@ -195,6 +236,14 @@ public:
 
     BigInteger operator-(BigInteger& other) const {
         return BigInteger(eval(digits, other.digits, BigInteger::OP::SUB));
+    }
+
+    bool operator==(const BigInteger& other) const {
+        return digits == other.digits;
+    }
+
+    bool operator==(const std::string& s) const {
+        return digits == s;
     }
 
     friend std::ostream& operator<<(std::ostream& os, BigInteger& bsi) {
