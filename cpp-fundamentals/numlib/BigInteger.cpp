@@ -63,7 +63,7 @@ private:
 
             // -x + y = y - x
             else if (AIsNegative && !BIsNegative) {
-                return eval(b, a, BigInteger::OP::SUB);
+                return _subtract(_abs(b), _abs(a));
             }
 
             // x + y
@@ -116,31 +116,37 @@ private:
         return firstCharInA == '-';
     }
 
-    std::string _max(std::string a, std::string b) const {
+    int _compareStrNumber(std::string a, std::string b) const {
         bool AIsNegative = _isNeg(a);
         bool BIsNegative = _isNeg(b);
 
         if (AIsNegative && !BIsNegative) {
-            return b;
+            return -1;
         } else if (!AIsNegative && BIsNegative) {
-            return a;
-        } else if (AIsNegative && b == "0") {
-            return b;
-        } else if (BIsNegative && a == "0") {
-            return a;
+            return 1;
         }
 
         if (AIsNegative && BIsNegative) {
-            return a.compare(b) > 0 ? b : a;
+            if (a.size() > b.size()) {
+                return -1;
+            } else if (a.size() < b.size()) {
+                return 1;
+            }
+
+            return b.compare(a);
         }
 
         if (a.size() > b.size()) {
-            return a;
+            return 1;
         } else if (b.size() > a.size()) {
-            return b;
+            return -1;
         }
 
-        return a.compare(b) > 0 ? a : b;
+        return a.compare(b);
+    }
+
+    std::string _max(std::string a, std::string b) const {
+        return _compareStrNumber(a, b) < 0 ? b : a;
     }
 
     std::string _add(std::string a, std::string b) const {
@@ -228,6 +234,10 @@ public:
 
     BigInteger max(BigInteger& b) const {
         return BigInteger(_max(digits, b.toString()));
+    }
+
+    int compare(const BigInteger& other) const {
+        return _compareStrNumber(digits, other.digits);
     }
 
     BigInteger operator+(const BigInteger& other) const {

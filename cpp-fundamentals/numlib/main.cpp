@@ -3,54 +3,121 @@
 #include <assert.h>
 
 int main() {
-    BigInteger a("0");
-    BigInteger b("0");
 
-    assert((a + b) == "0");
+    /*
+     * Unit Tests
+     *
+     * 1. compare
+     */
 
-    BigInteger a00("0");
-    BigInteger b00("2");
+    BigInteger cmp1("1");
+    BigInteger cmp2("2");
 
-    assert(a00 + b00 == "2");
-    assert(b00 + a00 == "2");
+    assert(cmp1.compare(cmp2) < 0);
+    assert(cmp2.compare(cmp1) > 0);
 
-    BigInteger a01("-2");
-    BigInteger b01("0");
+    BigInteger cmp3("-1");
+    BigInteger cmp4("1");
 
-    assert(a01 + b01 == "-2");
+    assert(cmp3.compare(cmp4) < 0);
+    assert(cmp4.compare(cmp3) > 0);
 
-    BigInteger a2("-9");
-    BigInteger b2("9");
+    BigInteger cmp5("0");
+    BigInteger cmp6("1");
 
-    assert((a2 + b2) == "0");
+    assert(cmp5.compare(cmp6) < 0);
+    assert(cmp6.compare(cmp5) > 0);
+
+    BigInteger cmp7("1");
+    BigInteger cmp8("1");
+
+    assert(cmp7.compare(cmp8) == 0);
+    assert(cmp8.compare(cmp7) == 0);
+
+    BigInteger cmp9("11");
+    BigInteger cmp10("15");
+
+    assert(cmp9.compare(cmp10) < 0);
+    assert(cmp10.compare(cmp9) > 0);
+
+    BigInteger cmp11("1111");
+    BigInteger cmp12("999");
+
+    assert(cmp11.compare(cmp12) > 0);
+    assert(cmp12.compare(cmp11) < 0);
+
+    BigInteger cmp13("-932");
+    BigInteger cmp14("-73");
+
+    assert(cmp13.compare(cmp14) < 0);
+    assert(cmp14.compare(cmp13) > 0);
+
+    BigInteger cmp15("-9");
+    BigInteger cmp16("-9");
+
+    assert(cmp15.compare(cmp16) == 0);
+    assert(cmp16.compare(cmp15) == 0);
+
+    BigInteger cmp17("-9873");
+    BigInteger cmp18("9283");
+
+    assert(cmp17.compare(cmp18) < 0);
+    assert(cmp18.compare(cmp17) > 0);
+
+    BigInteger cmp19("-1");
+    BigInteger cmp20("-3");
+
+    assert(cmp19.compare(cmp20) > 0);
+
+
+//    BigInteger a("0");
+//    BigInteger b("0");
 //
+//    assert((a + b) == "0");
 //
-    BigInteger a3("9");
-    BigInteger b3("-9");
-
-    assert((a3 + b3) == "0");
+//    BigInteger a00("0");
+//    BigInteger b00("2");
 //
-    BigInteger a4("-10");
-    BigInteger b4("-20");
-
-    assert((a4 + b4) == "-30");
+//    assert(a00 + b00 == "2");
+//    assert(b00 + a00 == "2");
 //
-    BigInteger a5("399");
-    BigInteger b5("101");
-
-    assert((a5 + b5) == "500");
+//    BigInteger a01("-2");
+//    BigInteger b01("0");
 //
-    BigInteger a6("30");
-    BigInteger b6("-30");
-
-    assert((a6 - b6) == "60");
+//    assert(a01 + b01 == "-2");
 //
-    BigInteger a7("-30");
-    BigInteger b7("30");
-
-    assert((a7 - b7) == "-60");
-
-    // Test 'max' method
+//    BigInteger a2("-9");
+//    BigInteger b2("9");
+//
+//    assert((a2 + b2) == "0");
+////
+////
+//    BigInteger a3("9");
+//    BigInteger b3("-9");
+//
+//    assert((a3 + b3) == "0");
+////
+//    BigInteger a4("-10");
+//    BigInteger b4("-20");
+//
+//    assert((a4 + b4) == "-30");
+////
+//    BigInteger a5("399");
+//    BigInteger b5("101");
+//
+//    assert((a5 + b5) == "500");
+////
+//    BigInteger a6("30");
+//    BigInteger b6("-30");
+//
+//    assert((a6 - b6) == "60");
+////
+//    BigInteger a7("-30");
+//    BigInteger b7("30");
+//
+//    assert((a7 - b7) == "-60");
+//
+//    // Test 'max' method
     BigInteger x("-1");
     BigInteger y("-3");
 
@@ -108,29 +175,34 @@ int main() {
     BigInteger z12("3");
 
     assert(x12.max(y12).max(z12) == "3");
+//
+//    // Subtract
+//    BigInteger as("30");
+//    BigInteger bs("10");
+//
+//    assert((as - bs) == "20");
+//
+//    BigInteger as1("1000");
+//    BigInteger bs1("1");
+//
+//    assert(as1 - bs1 == "999");
+//
+//    BigInteger as2("40");
+//    BigInteger bs2("11");
+//
+//    assert(as2 - bs2 == "29");
+//
+//    assert(bs2 - as2 == "-29");
+//
+//    BigInteger as3("734723894792834789237489327489237489274892");
+//    BigInteger bs3("293829839289382938928392839289328938928398");
+//
+//    // https://www.calculator.net/big-number-calculator.html was used to verify this
+//    assert(as3 - bs3 == "440894055503451850309096488199908550346494");
 
-    // Subtract
-    BigInteger as("30");
-    BigInteger bs("10");
-
-    assert((as - bs) == "20");
-
-    BigInteger as1("1000");
-    BigInteger bs1("1");
-
-    assert(as1 - bs1 == "999");
-
-    BigInteger as2("40");
-    BigInteger bs2("11");
-
-    assert(as2 - bs2 == "29");
-
-    assert(bs2 - as2 == "-29");
-
-    BigInteger as3("734723894792834789237489327489237489274892");
-    BigInteger bs3("293829839289382938928392839289328938928398");
-
-    assert(as3 - bs3 == "440894055503451850309096488199908550346494");
-
+//    BigInteger big1("-999999933333333333388888888888888888444444444444999999933333333333388888888888888888444444444444999999933333333333388888888888888888444444444444");
+//    BigInteger big2("293829839289382938928392839289328938928398293829839289382938928392839289328938928398293829839289382938928392839289328938928398293829839289382938928392839289328938928398");
+//
+//    assert(big1 + big2 == "293829839289382938928391839289395605595064904940950400494050483948394844328938995064960496450400494050039504394844884493928398360496505955994050039503950400884494483954");
     return 0;
 }
