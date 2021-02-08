@@ -1,7 +1,7 @@
 #include <iostream>
-#include "BigInteger.cpp"
+#include "BigInteger.h"
 #include <assert.h>
-//#include "PrependString.cpp"
+#include "PrependString.h"
 #include <chrono>
 #include <fstream>
 #include <vector>
@@ -78,13 +78,13 @@ int main() {
      * isNegative()
      */
     BigInteger n1("-1");
-    assert(n1.isNegative());
+    assert(n1.isNegative);
 
     BigInteger n2("1");
-    assert(!n2.isNegative());
+    assert(!n2.isNegative);
 
     BigInteger n3("0");
-    assert(!n3.isNegative());
+    assert(!n3.isNegative);
 
 
     BigInteger a("0");
@@ -222,6 +222,19 @@ int main() {
 
     assert(big1 + big2 == "293829839289382938928391839289395605595064904940950400494050483948394844328938995064960496450400494050039504394844884493928398360496505955994050039503950400884494483954");
 
+    // test equals override
+    BigInteger eq1("12345");
+    BigInteger eq2("-12345");
+
+    assert(!(eq1 == eq2));
+
+    BigInteger eq3("54321");
+    BigInteger eq4("54321");
+
+    assert(eq3 == eq4);
+
+    //
+
     std::vector<std::string> numberStrs;
     time_t time1;
     srand((unsigned) time(&time1));
@@ -259,16 +272,6 @@ int main() {
     // Measurements
     // 1. Using std::string = 36646.1 ms.
     // 2. Using custom PrependString class = 998.212 ms.
-
-    // Test PrependString class
-//    PrependString p(10);
-//    std::string test = "valerielud";
-//
-//    for (char c : test) {
-//        p.prepend(c);
-//    }
-//
-//    std::cout << std::string(p.get_buffer()) << std::endl;
 
     return 0;
 }

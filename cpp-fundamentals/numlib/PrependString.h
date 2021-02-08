@@ -1,6 +1,7 @@
 //
 // Created by valeri on 8.02.21 г..
 //
+# pragma once
 
 #include <cstdlib>
 

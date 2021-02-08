@@ -1,12 +1,14 @@
 //
 // Created by valeri on 1.02.21 г..
 //
+# pragma once
+
 #include <string>
 #include <math.h>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#include "PrependString.cpp"
+#include "PrependString.h"
 
 class BigInteger {
 private:
@@ -36,8 +38,8 @@ private:
     }
 
     BigInteger eval(const BigInteger& a, const BigInteger& b, BigInteger::OP operation) const {
-        bool AIsNegative = a.isNegative();
-        bool BIsNegative = b.isNegative();
+        bool AIsNegative = a.isNegative;
+        bool BIsNegative = b.isNegative;
 
         // if x = 0 or y = 0 or (x = 0 and y = 0)
         if (a.isZero()) {
@@ -46,7 +48,7 @@ private:
             return a.isZero() ? zero : a;
         }
 
-        // _add a,b when |a| = |b| and a < 0 and b > 0 or a > 0 and b < 0
+        // when |a| = |b| and opposite signs
         if (((AIsNegative && !BIsNegative) || (!AIsNegative && BIsNegative)) &&
             a.abs() == b.abs() && operation == BigInteger::OP::ADD) {
             return BigInteger("0");
@@ -57,17 +59,17 @@ private:
             if (AIsNegative && BIsNegative) {
                 return eval(a.abs(), b.abs(), BigInteger::OP::ADD).negate();
             }
-                // x + (-y) = x - y
+            // x + (-y) = x - y
             else if (!AIsNegative && BIsNegative) {
                 return eval(a, b.abs(), BigInteger::OP::SUB);
             }
 
-                // -x + y = y - x
+            // -x + y = y - x
             else if (AIsNegative && !BIsNegative) {
                 return _subtract(b.abs(), a.abs());
             }
 
-                // x + y
+            // x + y
             else if (!AIsNegative && !BIsNegative) {
                 return _add(a, b);
             }
@@ -76,7 +78,7 @@ private:
             if (AIsNegative && !BIsNegative) {
                 return eval(a.abs(), b.abs(), BigInteger::OP::ADD).negate();
             }
-                // x - y
+            // x - y
             else if (!AIsNegative && !BIsNegative) {
                 if (a == b) {
                     return BigInteger("0");
@@ -85,34 +87,32 @@ private:
                 return _subtract(a, b);
             }
 
-                // -x - (-y) = -x + y
+            // -x - (-y) = -x + y
             else if (AIsNegative && BIsNegative) {
                 return eval(a, b.abs(), BigInteger::OP::ADD);
             }
 
-                // x - (-y) = x + y
+            // x - (-y) = x + y
             else if (!AIsNegative && BIsNegative) {
                 return eval(a, b.abs(), BigInteger::OP::ADD);
             }
         }
-
-        return BigInteger("0");
     }
 
-    std::string _negate(const std::string& a) const {
-        if (_isNeg(a)) {
-            return a;
+    std::string _negate(const BigInteger& a) const {
+        if (a.isNegative) {
+            return a.digits;
         }
 
-        return "-" + a;
+        return "-" + a.digits;
     }
 
-    std::string _abs(const std::string& a) const {
-        if (_isNeg(a)) {
-            return a.substr(1);
+    std::string _abs(const BigInteger& a) const {
+        if (a.isNegative) {
+            return a.digits.substr(1);
         }
 
-        return a;
+        return a.digits;
     }
 
     bool _isNeg(const std::string& a) const {
@@ -121,9 +121,9 @@ private:
         return firstCharInA == '-';
     }
 
-    int _compareStrNumber(const std::string& a, const std::string& b) const {
-        bool AIsNegative = _isNeg(a);
-        bool BIsNegative = _isNeg(b);
+    int _compare(const BigInteger& a, const BigInteger& b) const {
+        bool AIsNegative = a.isNegative;
+        bool BIsNegative = b.isNegative;
 
         if (AIsNegative && !BIsNegative) {
             return -1;
@@ -132,26 +132,26 @@ private:
         }
 
         if (AIsNegative && BIsNegative) {
-            if (a.size() > b.size()) {
+            if (a.digitsCount > b.digitsCount) {
                 return -1;
-            } else if (a.size() < b.size()) {
+            } else if (a.digitsCount < b.digitsCount) {
                 return 1;
             }
 
-            return b.compare(a);
+            return b.digits.compare(a.digits);
         }
 
-        if (a.size() > b.size()) {
+        if (a.digitsCount > b.digitsCount) {
             return 1;
-        } else if (b.size() > a.size()) {
+        } else if (b.digitsCount > a.digitsCount) {
             return -1;
         }
 
-        return a.compare(b);
+        return a.digits.compare(b.digits);
     }
 
-    std::string _max(const std::string& a,const std::string& b) const {
-        return _compareStrNumber(a, b) < 0 ? b : a;
+    BigInteger _max(const BigInteger& a,const BigInteger& b) const {
+        return _compare(a, b) < 0 ? b : a;
     }
 
     BigInteger _add(const BigInteger& a, const BigInteger& b) const {
@@ -230,19 +230,18 @@ private:
         return a < b ? _negate(std::string(subResult.get_buffer())) : std::string(subResult.get_buffer());
     }
 public:
+    bool isNegative;
+
     BigInteger(const std::string& digits): digits(digits) {
         if (!isValid(digits)) {
             throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
         }
         digitsCount = digits.size();
+        isNegative = _isNeg(digits);
     }
 
     std::string toString() const {
         return digits;
-    }
-
-    bool isNegative() const {
-        return _isNeg(digits);
     }
 
     bool isZero() const {
@@ -254,15 +253,15 @@ public:
     }
 
     BigInteger abs() const {
-        return BigInteger(_abs(digits));
+        return BigInteger(_abs(*this));
     }
 
     BigInteger max(const BigInteger& b) const {
-        return BigInteger(_max(digits, b.toString()));
+        return BigInteger(_max(*this, b));
     }
 
     int compare(const BigInteger& other) const {
-        return _compareStrNumber(digits, other.digits);
+        return _compare(*this, other);
     }
 
     BigInteger operator+(const BigInteger& other) const {
