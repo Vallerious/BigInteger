@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include "PrependString.cpp"
 
 class BigInteger {
 private:
@@ -158,8 +159,9 @@ private:
         int lenB = b.digitsCount;
         int idxA = lenA - 1;
         int idxB = lenB - 1;
-        std::string sumStr;
-        sumStr.reserve(std::max(lenA, lenB) + 1);
+        PrependString sumStr(std::max(lenA, lenB) + 1);
+//        std::string sumStr;
+//        sumStr.reserve(std::max(lenA, lenB) + 1);
         short carry = 0;
 
         while (idxA >= 0 || idxB >= 0) {
@@ -176,17 +178,20 @@ private:
             }
 
             // TODO: this is not great...create a string class that is optimized for prepend.
-            sumStr = std::to_string(digitSum) + sumStr;
+            sumStr.prepend((char)digitSum + 48);
+//            sumStr = std::to_string(digitSum) + sumStr;
 
             idxA -= 1;
             idxB -= 1;
         }
 
         if (carry > 0) {
-            sumStr = "1" + sumStr;
+            sumStr.prepend('1');
+//            sumStr = "1" + sumStr;
         }
 
-        return BigInteger(sumStr);
+        return BigInteger(std::string(sumStr.get_buffer()));
+//        return BigInteger(sumStr);
     }
 
     BigInteger _subtract(const BigInteger& a, const BigInteger& b) const {
@@ -198,8 +203,7 @@ private:
         int lenB = subtractor.digitsCount;
         int idxA = lenA - 1;
         int idxB = lenB - 1;
-        std::string subResult;
-        subResult.reserve(std::max(lenA, lenB) + 1);
+        PrependString subResult(std::max(lenA, lenB));
         short carry = 0;
 
         while (idxA >= 0 || idxB >= 0) {
@@ -216,14 +220,14 @@ private:
             }
 
             if (!(idxA <= 0 && idxB <= 0 && digitSub == 0)) {
-                subResult = std::to_string(digitSub) + subResult;
+                subResult.prepend((char)digitSub + 48);
             }
 
             idxA -= 1;
             idxB -= 1;
         }
 
-        return a < b ? _negate(subResult) : subResult;
+        return a < b ? _negate(std::string(subResult.get_buffer())) : std::string(subResult.get_buffer());
     }
 public:
     BigInteger(const std::string& digits): digits(digits) {
@@ -271,6 +275,10 @@ public:
 
     bool operator<(const BigInteger& other) const {
         return this->compare(other) < 0;
+    }
+
+    bool operator>(const BigInteger& other) const {
+        return this->compare(other) > 0;
     }
 
     bool operator==(const BigInteger& other) const {
