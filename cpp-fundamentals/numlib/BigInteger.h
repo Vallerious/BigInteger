@@ -15,7 +15,6 @@ private:
     std::string digits;
     unsigned int digitsCount;
     enum OP { ADD, SUB, MUL, DEL };
-    std::string zero = "0";
 
     bool isValid(const std::string& digits) {
         if (digits.empty()) {
@@ -43,9 +42,9 @@ private:
 
         // if x = 0 or y = 0 or (x = 0 and y = 0)
         if (a.isZero()) {
-            return b.isZero() ? zero : b;
+            return b.isZero() ? BigInteger("0") : b;
         } else if (b.isZero()) {
-            return a.isZero() ? zero : a;
+            return a.isZero() ? BigInteger("0") : a;
         }
 
         // when |a| = |b| and opposite signs
@@ -57,11 +56,11 @@ private:
         if (operation == BigInteger::OP::ADD) {
             // -x + (-y) = -x - y
             if (AIsNegative && BIsNegative) {
-                return eval(a.abs(), b.abs(), BigInteger::OP::ADD).negate();
+                return _add(a.abs(), b.abs()).negate();
             }
             // x + (-y) = x - y
             else if (!AIsNegative && BIsNegative) {
-                return eval(a, b.abs(), BigInteger::OP::SUB);
+                return _subtract(a, b.abs());
             }
 
             // -x + y = y - x
@@ -76,7 +75,7 @@ private:
         } else if (operation == BigInteger::OP::SUB) {
             // -x - y
             if (AIsNegative && !BIsNegative) {
-                return eval(a.abs(), b.abs(), BigInteger::OP::ADD).negate();
+                return _add(a.abs(), b.abs()).negate();
             }
             // x - y
             else if (!AIsNegative && !BIsNegative) {
@@ -89,12 +88,12 @@ private:
 
             // -x - (-y) = -x + y
             else if (AIsNegative && BIsNegative) {
-                return eval(a, b.abs(), BigInteger::OP::ADD);
+                return _add(a, b.abs());
             }
 
             // x - (-y) = x + y
             else if (!AIsNegative && BIsNegative) {
-                return eval(a, b.abs(), BigInteger::OP::ADD);
+                return _add(a, b.abs());
             }
         }
     }
@@ -246,9 +245,9 @@ public:
     bool isNegative;
 
     BigInteger(const std::string& digits): digits(digits) {
-        if (!isValid(digits)) {
-            throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
-        }
+//        if (!isValid(digits)) {
+//            throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
+//        }
         digitsCount = digits.size();
         isNegative = _isNeg(digits);
     }
@@ -258,7 +257,7 @@ public:
     }
 
     bool isZero() const {
-        return digits == zero;
+        return digits == "0";
     }
 
     BigInteger negate() const {
