@@ -100,25 +100,15 @@ private:
     }
 
     std::string _negate(const BigInteger& a) const {
-        if (a.isNegative) {
-            return a.digits;
-        }
-
-        return "-" + a.digits;
+        return a.isNegative ? a.digits : "-" + a.digits;
     }
 
     std::string _abs(const BigInteger& a) const {
-        if (a.isNegative) {
-            return a.digits.substr(1);
-        }
-
-        return a.digits;
+        return a.isNegative ? a.digits.substr(1) : a.digits;
     }
 
     bool _isNeg(const std::string& a) const {
-        char firstCharInA = a.at(0);
-
-        return firstCharInA == '-';
+        return a.at(0) == '-';
     }
 
     int _compare(const BigInteger& a, const BigInteger& b) const {
@@ -177,7 +167,6 @@ private:
                 carry = 0;
             }
 
-            // TODO: this is not great...create a string class that is optimized for prepend.
             sumStr.prepend((char)digitSum + 48);
 //            sumStr = std::to_string(digitSum) + sumStr;
 
@@ -229,6 +218,30 @@ private:
 
         return a < b ? _negate(std::string(subResult.get_buffer())) : std::string(subResult.get_buffer());
     }
+
+    BigInteger _mult(const BigInteger& a, const BigInteger& b) const {
+        bool isANegative = a.isNegative;
+        bool isBNegative = b.isNegative;
+
+        BigInteger _a(a.abs());
+        BigInteger _b(b.abs());
+
+        BigInteger r(_b.digits);
+        _a = _a - BigInteger("1");
+        BigInteger z("0");
+
+        while (_a > z) {
+            r = r + _b;
+            _a = _a - BigInteger("1");
+        }
+
+        if ((!isANegative && isBNegative) ||
+        (isANegative && !isBNegative)) {
+            return r.negate();
+        }
+
+        return r;
+    }
 public:
     bool isNegative;
 
@@ -262,6 +275,10 @@ public:
 
     int compare(const BigInteger& other) const {
         return _compare(*this, other);
+    }
+
+    BigInteger operator*(const BigInteger& other) const {
+        return _mult(*this, other);
     }
 
     BigInteger operator+(const BigInteger& other) const {

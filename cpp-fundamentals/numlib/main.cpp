@@ -273,5 +273,27 @@ int main() {
     // 1. Using std::string = 36646.1 ms.
     // 2. Using custom PrependString class = 998.212 ms.
 
+    // Test multiplication
+    BigInteger m1("3");
+    BigInteger m2("2");
+
+    assert(m1 * m2 == BigInteger("6"));
+
+    BigInteger m3("5");
+    BigInteger m4("-5");
+
+    assert(m3 * m4 == BigInteger("-25"));
+
+    BigInteger m5("-4");
+    BigInteger m6("-4");
+
+    assert(m5 * m6 == "16");
+
+    BigInteger m7("99999999");
+    BigInteger m8("99999999");
+
+    // this will take days....have to use some smarter multiplication algo
+    assert(m7 * m8 == "9999999800000001");
+
     return 0;
 }
