@@ -310,6 +310,14 @@ public:
         return result;
     }
 
+    static BigInteger factoriel(const BigInteger& n) {
+        if (n.isZero()) {
+            return BigInteger("1");
+        }
+
+        return n * factoriel(n - BigInteger("1"));
+    }
+
     BigInteger operator+(const BigInteger& other) const {
         return BigInteger(eval(digits, other.digits, BigInteger::OP::ADD));
     }
