@@ -16,7 +16,7 @@ private:
     unsigned int digitsCount;
     enum OP { ADD, SUB, MUL, DEL };
 
-    bool isValid(const std::string& digits) {
+    static bool isValid(const std::string& digits) {
         if (digits.empty()) {
             return false;
         }
@@ -98,19 +98,19 @@ private:
         }
     }
 
-    std::string _negate(const BigInteger& a) const {
+    static std::string _negate(const BigInteger& a) {
         return a.isNegative ? a.digits : "-" + a.digits;
     }
 
-    std::string _abs(const BigInteger& a) const {
-        return a.isNegative ? a.digits.substr(1) : a.digits;
+    static std::string _abs(const BigInteger& a) {
+        return a.isNegative ? &a.digits[1] : a.digits;
     }
 
-    bool _isNeg(const std::string& a) const {
+    static bool _isNeg(const std::string& a) {
         return a.at(0) == '-';
     }
 
-    int _compare(const BigInteger& a, const BigInteger& b) const {
+    static int _compare(const BigInteger& a, const BigInteger& b) {
         bool AIsNegative = a.isNegative;
         bool BIsNegative = b.isNegative;
 
@@ -136,6 +136,7 @@ private:
             return -1;
         }
 
+        // we do not need a full compare function here...if one digit is off then the numbers are not equal
         return a.digits.compare(b.digits);
     }
 
@@ -143,7 +144,7 @@ private:
         return _compare(a, b) < 0 ? b : a;
     }
 
-    BigInteger _add(const BigInteger& a, const BigInteger& b) const {
+    static BigInteger _add(const BigInteger& a, const BigInteger& b) {
         int lenA = a.digitsCount;
         int lenB = b.digitsCount;
         int idxA = lenA - 1;
@@ -182,7 +183,7 @@ private:
 //        return BigInteger(sumStr);
     }
 
-    BigInteger _subtract(const BigInteger& a, const BigInteger& b) const {
+    static BigInteger _subtract(const BigInteger& a, const BigInteger& b) {
         // make so that a > b
         BigInteger subtractee = a.max(b);
         BigInteger subtractor = a == subtractee ? b : a;
@@ -222,16 +223,20 @@ private:
         bool isANegative = a.isNegative;
         bool isBNegative = b.isNegative;
 
+        if (a.isZero() || b.isZero()) {
+            return BigInteger("0");
+        }
+
         BigInteger _a(a.abs());
         BigInteger _b(b.abs());
 
-        BigInteger r(_b.digits);
-        _a = _a - BigInteger("1");
+        BigInteger r(_a.digits);
+        _b = _b - BigInteger("1");
         BigInteger z("0");
 
-        while (_a > z) {
-            r = r + _b;
-            _a = _a - BigInteger("1");
+        while (_b > z) {
+            r = r + _a;
+            _b = _b - BigInteger("1");
         }
 
         if ((!isANegative && isBNegative) ||
@@ -277,7 +282,32 @@ public:
     }
 
     BigInteger operator*(const BigInteger& other) const {
-        return _mult(*this, other);
+        bool isANegative = this->isNegative;
+        bool isBNegative = other.isNegative;
+
+        BigInteger _a(this->abs());
+        BigInteger _b(other.abs());
+
+        int numZeroesToAdd = 0;
+        BigInteger result("0");
+
+        for (int i = _b.digitsCount - 1; i >= 0; i--) {
+            BigInteger product = _mult(_a, BigInteger(std::string(1, _b.digits[i])));
+
+            for (int z = 0; z < numZeroesToAdd; z++) {
+                product = BigInteger(product.digits + "0");
+            }
+
+            result = result + product;
+            numZeroesToAdd++;
+        }
+
+        if ((!isANegative && isBNegative) ||
+            (isANegative && !isBNegative)) {
+            return result.negate();
+        }
+
+        return result;
     }
 
     BigInteger operator+(const BigInteger& other) const {
