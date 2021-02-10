@@ -8,7 +8,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#include "PrependString.h"
 
 class BigInteger {
 private:
@@ -310,12 +309,12 @@ public:
         return result;
     }
 
-    static BigInteger factoriel(const BigInteger& n) {
+    static BigInteger factorial(const BigInteger& n) {
         if (n.isZero()) {
             return BigInteger("1");
         }
 
-        return n * factoriel(n - BigInteger("1"));
+        return n * factorial(n - BigInteger("1"));
     }
 
     BigInteger operator+(const BigInteger& other) const {
@@ -346,4 +345,28 @@ public:
         os << bsi.toString();
         return os;
     }
+
+    class PrependString {
+    private:
+        char* buffer;
+        int start;
+    public:
+        PrependString(int capacity){
+            buffer = (char*) malloc(sizeof(char) * (capacity + 1));
+            buffer[capacity] = '\0';
+            start = capacity - 1;
+        }
+
+        void prepend(char c) {
+            buffer[start--] = c;
+        }
+
+        char* get_buffer() {
+            return &buffer[++start];
+        }
+
+        ~PrependString() {
+            free(buffer);
+        }
+    };
 };

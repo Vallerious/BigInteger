@@ -1,7 +1,6 @@
 #include <iostream>
 #include "BigInteger.h"
 #include <assert.h>
-#include "PrependString.h"
 #include <chrono>
 #include <fstream>
 #include <vector>
@@ -274,20 +273,20 @@ int main() {
     // 2. Using custom PrependString class = 998.212 ms.
 
     // Test multiplication
-//    BigInteger m1("3");
-//    BigInteger m2("2");
-//
-//    assert(m1 * m2 == BigInteger("6"));
-//
-//    BigInteger m3("5");
-//    BigInteger m4("-5");
-//
-//    assert(m3 * m4 == BigInteger("-25"));
-//
-//    BigInteger m5("-4");
-//    BigInteger m6("-4");
+    BigInteger m1("3");
+    BigInteger m2("2");
 
-//    assert(m5 * m6 == "16");
+    assert(m1 * m2 == BigInteger("6"));
+
+    BigInteger m3("5");
+    BigInteger m4("-5");
+
+    assert(m3 * m4 == BigInteger("-25"));
+
+    BigInteger m5("-4");
+    BigInteger m6("-4");
+
+    assert(m5 * m6 == "16");
 
     BigInteger m7("99999996000000059999999600000001");
     BigInteger m8("99999996000000059999999600000001");
@@ -296,7 +295,7 @@ int main() {
 
     //test factoriel
     // that is pretty fast actually.
-    assert(BigInteger::factoriel(BigInteger("80")) == BigInteger("71569457046263802294811533723186532165584657342365752577109445058227039255480148842668944867280814080000000000000000000"));
+    assert(BigInteger::factorial(BigInteger("80")) == BigInteger("71569457046263802294811533723186532165584657342365752577109445058227039255480148842668944867280814080000000000000000000"));
 
     return 0;
 }
