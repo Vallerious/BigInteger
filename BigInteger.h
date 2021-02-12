@@ -10,30 +10,109 @@
 #include <stdexcept>
 
 class BigInteger {
+public:
+    bool isNegative;
+
+    // call with invalid integer will cause UB
+    BigInteger(const std::string& digits): digits(digits) {
+        digitsCount = digits.size();
+        isNegative = _isNeg(digits);
+    }
+
+    std::string toString() const {
+        return digits;
+    }
+
+    bool isZero() const {
+        return digits == "0";
+    }
+
+    BigInteger negate() const {
+        return BigInteger(_negate(digits));
+    }
+
+    BigInteger abs() const {
+        return BigInteger(_abs(*this));
+    }
+
+    BigInteger max(const BigInteger& b) const {
+        return BigInteger(_max(*this, b));
+    }
+
+    int compare(const BigInteger& other) const {
+        return _compare(*this, other);
+    }
+
+    BigInteger operator*(const BigInteger& other) const {
+        bool isANegative = this->isNegative;
+        bool isBNegative = other.isNegative;
+
+        BigInteger _a(this->abs());
+        BigInteger _b(other.abs());
+
+        int numZeroesToAdd = 0;
+        BigInteger result("0");
+
+        for (int i = _b.digitsCount - 1; i >= 0; i--) {
+            BigInteger product = _mult(_a, BigInteger(std::string(1, _b.digits[i])));
+
+            for (int z = 0; z < numZeroesToAdd; z++) {
+                product = BigInteger(product.digits + "0");
+            }
+
+            result = result + product;
+            numZeroesToAdd++;
+        }
+
+        if ((!isANegative && isBNegative) ||
+            (isANegative && !isBNegative)) {
+            return result.negate();
+        }
+
+        return result;
+    }
+
+    static BigInteger factorial(const BigInteger& n) {
+        if (n.isZero()) {
+            return BigInteger("1");
+        }
+
+        return n * factorial(n - BigInteger("1"));
+    }
+
+    BigInteger operator+(const BigInteger& other) const {
+        return BigInteger(eval(digits, other.digits, BigInteger::OP::ADD));
+    }
+
+    BigInteger operator-(const BigInteger& other) const {
+        return BigInteger(eval(digits, other.digits, BigInteger::OP::SUB));
+    }
+
+    bool operator<(const BigInteger& other) const {
+        return this->compare(other) < 0;
+    }
+
+    bool operator>(const BigInteger& other) const {
+        return this->compare(other) > 0;
+    }
+
+    bool operator==(const BigInteger& other) const {
+        return digits == other.digits;
+    }
+
+    bool operator==(const std::string& s) const {
+        return digits == s;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const BigInteger& bsi) {
+        os << bsi.toString();
+        return os;
+    }
+
 private:
     std::string digits;
     unsigned int digitsCount;
     enum OP { ADD, SUB, MUL, DEL };
-
-    static bool isValid(const std::string& digits) {
-        if (digits.empty()) {
-            return false;
-        }
-
-        int i = 0;
-
-        if (digits.at(0) == '-') {
-            i = 1;
-        }
-
-        for (int len = digits.size(); i < len; i++) {
-            if (!std::isdigit(digits.at(i))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     BigInteger eval(const BigInteger& a, const BigInteger& b, BigInteger::OP operation) const {
         bool AIsNegative = a.isNegative;
@@ -232,106 +311,6 @@ private:
         }
 
         return r;
-    }
-public:
-    bool isNegative;
-
-    BigInteger(const std::string& digits): digits(digits) {
-//        if (!isValid(digits)) {
-//            throw std::invalid_argument("parameter cannot be empty or negative and must be a valid integer");
-//        }
-        digitsCount = digits.size();
-        isNegative = _isNeg(digits);
-    }
-
-    std::string toString() const {
-        return digits;
-    }
-
-    bool isZero() const {
-        return digits == "0";
-    }
-
-    BigInteger negate() const {
-        return BigInteger(_negate(digits));
-    }
-
-    BigInteger abs() const {
-        return BigInteger(_abs(*this));
-    }
-
-    BigInteger max(const BigInteger& b) const {
-        return BigInteger(_max(*this, b));
-    }
-
-    int compare(const BigInteger& other) const {
-        return _compare(*this, other);
-    }
-
-    BigInteger operator*(const BigInteger& other) const {
-        bool isANegative = this->isNegative;
-        bool isBNegative = other.isNegative;
-
-        BigInteger _a(this->abs());
-        BigInteger _b(other.abs());
-
-        int numZeroesToAdd = 0;
-        BigInteger result("0");
-
-        for (int i = _b.digitsCount - 1; i >= 0; i--) {
-            BigInteger product = _mult(_a, BigInteger(std::string(1, _b.digits[i])));
-
-            for (int z = 0; z < numZeroesToAdd; z++) {
-                product = BigInteger(product.digits + "0");
-            }
-
-            result = result + product;
-            numZeroesToAdd++;
-        }
-
-        if ((!isANegative && isBNegative) ||
-            (isANegative && !isBNegative)) {
-            return result.negate();
-        }
-
-        return result;
-    }
-
-    static BigInteger factorial(const BigInteger& n) {
-        if (n.isZero()) {
-            return BigInteger("1");
-        }
-
-        return n * factorial(n - BigInteger("1"));
-    }
-
-    BigInteger operator+(const BigInteger& other) const {
-        return BigInteger(eval(digits, other.digits, BigInteger::OP::ADD));
-    }
-
-    BigInteger operator-(const BigInteger& other) const {
-        return BigInteger(eval(digits, other.digits, BigInteger::OP::SUB));
-    }
-
-    bool operator<(const BigInteger& other) const {
-        return this->compare(other) < 0;
-    }
-
-    bool operator>(const BigInteger& other) const {
-        return this->compare(other) > 0;
-    }
-
-    bool operator==(const BigInteger& other) const {
-        return digits == other.digits;
-    }
-
-    bool operator==(const std::string& s) const {
-        return digits == s;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const BigInteger& bsi) {
-        os << bsi.toString();
-        return os;
     }
 
     class PrependString {
