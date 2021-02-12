@@ -63,14 +63,11 @@ private:
             }
 
             // -x + y = y - x
-            else if (AIsNegative && !BIsNegative) {
+            else if (AIsNegative) {
                 return _subtract(b.abs(), a.abs());
             }
 
-            // x + y
-            else if (!AIsNegative && !BIsNegative) {
-                return _add(a, b);
-            }
+            return _add(a, b);
         } else if (operation == BigInteger::OP::SUB) {
             // -x - y
             if (AIsNegative && !BIsNegative) {
@@ -86,14 +83,11 @@ private:
             }
 
             // -x - (-y) = -x + y
-            else if (AIsNegative && BIsNegative) {
+            else if (AIsNegative) {
                 return _add(a, b.abs());
             }
 
-            // x - (-y) = x + y
-            else if (!AIsNegative && BIsNegative) {
-                return _add(a, b.abs());
-            }
+            return _add(a, b.abs());
         }
     }
 
@@ -119,7 +113,7 @@ private:
             return 1;
         }
 
-        if (AIsNegative && BIsNegative) {
+        if (AIsNegative) {
             if (a.digitsCount > b.digitsCount) {
                 return -1;
             } else if (a.digitsCount < b.digitsCount) {
@@ -135,7 +129,6 @@ private:
             return -1;
         }
 
-        // we do not need a full compare function here...if one digit is off then the numbers are not equal
         return a.digits.compare(b.digits);
     }
 
@@ -149,8 +142,6 @@ private:
         int idxA = lenA - 1;
         int idxB = lenB - 1;
         PrependString sumStr(std::max(lenA, lenB) + 1);
-//        std::string sumStr;
-//        sumStr.reserve(std::max(lenA, lenB) + 1);
         short carry = 0;
 
         while (idxA >= 0 || idxB >= 0) {
@@ -167,7 +158,6 @@ private:
             }
 
             sumStr.prepend((char)digitSum + 48);
-//            sumStr = std::to_string(digitSum) + sumStr;
 
             idxA -= 1;
             idxB -= 1;
@@ -175,11 +165,9 @@ private:
 
         if (carry > 0) {
             sumStr.prepend('1');
-//            sumStr = "1" + sumStr;
         }
 
         return BigInteger(std::string(sumStr.get_buffer()));
-//        return BigInteger(sumStr);
     }
 
     static BigInteger _subtract(const BigInteger& a, const BigInteger& b) {

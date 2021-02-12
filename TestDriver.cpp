@@ -259,7 +259,7 @@ int main() {
             BigInteger a(numberStrs.at(i));
             BigInteger b(numberStrs.at(j));
 
-            BigInteger z = a + b;
+            BigInteger z = a - b;
         }
     }
 
